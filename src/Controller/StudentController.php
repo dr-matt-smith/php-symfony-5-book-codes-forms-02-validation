@@ -28,36 +28,38 @@ class StudentController extends AbstractController
 
 
     /**
-     * @Route("/student/new", name="student_new_form", methods={"POST", "GET"})
+     * @Route("/student/new", name="student_new_form")
      */
-    public function new(Request $request) {
-        // attempt to find values in POST variables
+    public function newForm()
+    {
+        $template = 'student/new.html.twig';
+        $args = [
+        ];
+        return $this->render($template, $args);
+    }
+
+    /**
+     * @Route("/student/processNewForm", name="student_process_new_form")
+     */
+    public function processNewForm(Request $request)
+    {
+        // extract name values from POST data
         $firstName = $request->request->get('firstName');
         $surname = $request->request->get('surname');
 
         // valid if neither value is EMPTY
         $isValid = !empty($firstName) && !empty($surname);
-
-        // was form submitted with POST method?
-        $isSubmitted = $request->isMethod('POST');
-
-        // if SUBMITTED & VALID - go ahead and create new object
-        if ($isSubmitted && $isValid) {
-            return $this->create($firstName, $surname);
-        }
-
-        if ($isSubmitted && !$isValid) { $this->addFlash(
+        if(!$isValid){
+            $this->addFlash(
             'error',
             'student firstName/surname cannot be an empty string'
         );
+            // forward this to the createAction() method
+            return $this->newForm();
         }
-        // render the form for the user
-        $template = 'student/new.html.twig';
-        $args = [
-            'firstName' => $firstName,
-            'surname' => $surname
-        ];
-        return $this->render($template, $args);
+
+        // forward this to the createAction() method
+        return $this->create($firstName, $surname);
     }
 
     /**
